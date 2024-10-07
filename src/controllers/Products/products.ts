@@ -31,8 +31,55 @@ const createProduct = async (req: Request, res: Response) => {
  }
 }
 
+const updateProduct = async (req: Request, res: Response) =>{
+  try {
+    const {id} = req.params;
+    const {nome, descricao, preco, estoque} : productsDto = req.body;
+    const existProduct = await prisma.produtos.findFirst({where: {id: parseInt(id)}})
 
+    if(!existProduct){
+      return res.status(404).json({message: "Produto não encontrado"})
+    }
+
+    const updateProduct = await prisma.produtos.update({
+      where: {id: parseInt(id)},
+      data:{
+        nome,
+        descricao,
+        preco,
+        estoque: existProduct.estoque + estoque
+      }
+  });
+
+
+   return res.status(200).json(updateProduct)
+
+
+  } catch (error) {
+    return res.status(500).json({message: "Error interno do servidor"});
+  }
+}
+
+const deleteProduct = async (req: Request, res: Response) =>{
+ try {
+  const {id} = req.params;
+  const existProduct = await prisma.produtos.findFirst({where: {id: parseInt(id)}})
+  if(!existProduct){
+    return res.status(404).json({message: "Produto não encontrado"})
+  }
+
+  const deleteProduct  = await prisma.produtos.delete({where: {id:parseInt(id)}})
+
+   return res.status(200).send();
+
+ } catch (error) {
+  
+ }
+  
+}
 
 export default {
-  createProduct
+  createProduct,
+  updateProduct,
+  deleteProduct
 }
