@@ -21,8 +21,8 @@ model Produtos {
   id         Int       @id @default(autoincrement())
   nome       String
   descricao  String
-  preco      String
-  estoque    String
+  preco      Decimal
+  estoque    Int
   created_at DateTime  @default(now())
   pedidos    Pedidos[]
 }
