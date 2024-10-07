@@ -16,7 +16,7 @@ const createUsers = async (req: Request, res: Response) =>  {
   return res.status(401).json({message: "Este CPF já existe"})
  } 
 
- 
+ if(tipo_usuario === "cliente" || tipo_usuario === "administrador"){
   const newUser =  await prisma.usuarios.create({
     data:{
       nome_completo,
@@ -28,25 +28,19 @@ const createUsers = async (req: Request, res: Response) =>  {
   })
 
 return res.status(200).json(newUser)
+ }else {
+  return res.status(404).json({message:"tipo de usuário deve ser cliente ou administrador"})
+ }
+ 
+
  } catch (error) {
   return res.status(500).json({ message: "Erro interno do servidor"});
  }
 
 }
 
-const showUser = async (req: Request, res: Response) =>{
- try {
-  const {id}= req.params;
-  const showUser = await prisma.usuarios.findFirst({where: {id:Number(id)}})
-  if(!showUser){
-    return res.status(404).json({message: "Usuario não encontrado"})
-  }
- } catch (error) {
-  return res.status(500).json({ message: "Erro interno do servidor"});
- }
-}
+
 
 export default {
-  createUsers,
-  showUser
+  createUsers
 }
