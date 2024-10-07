@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
+model Usuarios {
   id            Int       @id @default(autoincrement())
   nome_completo String
   cpf           String    @unique
@@ -34,6 +34,6 @@ model Pedidos {
   produto_id Int
   quantidade Int
   created_at DateTime @default(now())
-  user       Usuario  @relation(fields: [cliente_id], references: [id])
+  user       Usuarios @relation(fields: [cliente_id], references: [id])
   produtos   Produtos @relation(fields: [produto_id], references: [id])
 }

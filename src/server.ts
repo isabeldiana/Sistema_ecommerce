@@ -1,9 +1,10 @@
-import express, {Response, Request} from 'express';
+require('dotenv').config();
+import  express  from 'express';
+import router from './routes/routes';
 
 const app = express();
 
-const port  = process.env.PORT;
-
 app.use(express.json());
 
-app.listen(port);
+app.use(router);
+app.listen(process.env.PORT);
