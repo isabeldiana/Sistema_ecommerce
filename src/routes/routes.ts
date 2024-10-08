@@ -13,5 +13,5 @@ router.put('/createProduct/:tipo_usuario/:id', userType.admMiddleware, products.
 router.delete('/createProduct/:tipo_usuario/:id', userType.admMiddleware, products.deleteProduct )
 
 router.post('/createOrder/:tipo_usuario/:id', userType.clientMiddleware, orders.createOrder )
-
+router.get('/showeOrder/:tipo_usuario/:id', userType.admMiddleware, orders.showeAllOrders )
 export default router;
