@@ -29,7 +29,7 @@ model Produtos {
 
 model Pedidos {
   id         Int      @id @default(autoincrement())
-  id_pedidos Int
+  id_pedido  Int
   cliente_id Int
   produto_id Int
   quantidade Int

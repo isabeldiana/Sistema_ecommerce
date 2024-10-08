@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { ordersDto } from '../Orders/orders.dto';
 import prisma from '../../database/prismaClient';
-import products from '../Products/products';
-
 
 const createOrder = async (req: Request, res: Response) => {
   try {
@@ -17,7 +15,7 @@ const createOrder = async (req: Request, res: Response) => {
     };
 
     const id_order = generateId();
-    const ordersDate =  new Date();
+    const ordersDate = new Date();
 
     for (const item of items) {
       const { produto_id, quantidade } = item;
@@ -32,12 +30,12 @@ const createOrder = async (req: Request, res: Response) => {
 
 
       if (quantidade <= 0 || quantidade > products.estoque) {
-        return res.status(400).json({ error: `Quantidade inválida. A quantidade deve ser maior que 0 e menor ou igual ao estoque disponível (${products.estoque}).` });
+        return res.status(400).json({ error: `Estoque insufiente, no momento exitem (${products.estoque}) deste produto. ` });
       }
 
-      const newOrder = await prisma.pedidos.create({
+      await prisma.pedidos.create({
         data: {
-          id_pedidos: id_order,
+          id_pedido: id_order,
           cliente_id: parseInt(id),
           produto_id,
           quantidade,
@@ -56,11 +54,11 @@ const createOrder = async (req: Request, res: Response) => {
     const orders = await prisma.pedidos.findMany({
       where: {
         cliente_id: Number(id),
-        id_pedidos: Number(id_order)
+        id_pedido: Number(id_order)
       },
       select: {
         cliente_id: true,
-        id_pedidos: true,
+        id_pedido: true,
         quantidade: true,
         produtos: {
           select: {
@@ -82,7 +80,7 @@ const createOrder = async (req: Request, res: Response) => {
         quantidade: product.quantidade,
       })),
       data_da_compra: ordersDate
-  
+
     };
 
     return res.status(200).json(resultOrders);
@@ -92,25 +90,25 @@ const createOrder = async (req: Request, res: Response) => {
   }
 }
 
-const showeAllOrders =async (req: Request, res: Response) => {
+const showeAllOrders = async (req: Request, res: Response) => {
   try {
     const orders = await prisma.pedidos.groupBy({
-      by: ['id_pedidos', 'cliente_id', 'created_at']
+      by: ['id_pedido', 'cliente_id', 'created_at']
     });
     let orderDetails = [];
 
     for (const order of orders) {
-     
+
       const productData = await prisma.pedidos.findMany({
         where: {
-          id_pedidos: order.id_pedidos, 
+          id_pedido: order.id_pedido,
         },
         select: {
           cliente_id: true,
-          id_pedidos: true,
+          id_pedido: true,
           quantidade: true,
           created_at: true,
-          produtos: { 
+          produtos: {
             select: {
               nome: true,
               id: true,
@@ -118,11 +116,11 @@ const showeAllOrders =async (req: Request, res: Response) => {
           }
         }
       });
-    
-     
+
+
       orderDetails.push({
         cliente_id: order.cliente_id,
-        id_pedidos: order.id_pedidos,
+        id_pedido: order.id_pedido,
         data_compra: order.created_at,
         produtos: productData.map(product => ({
           id: product.produtos.id,
@@ -138,11 +136,11 @@ const showeAllOrders =async (req: Request, res: Response) => {
   }
 }
 
-const showeOrdersByClient =async (req: Request, res: Response) => {
+const showeOrdersByClient = async (req: Request, res: Response) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const orders = await prisma.pedidos.groupBy({
-      by: ['id_pedidos', 'cliente_id', 'created_at'],
+      by: ['id_pedido', 'cliente_id', 'created_at'],
       where: {
         cliente_id: parseInt(id)
       },
@@ -150,17 +148,17 @@ const showeOrdersByClient =async (req: Request, res: Response) => {
     let orderDetails = [];
 
     for (const order of orders) {
-     
+
       const productData = await prisma.pedidos.findMany({
         where: {
-          id_pedidos: order.id_pedidos, 
+          id_pedido: order.id_pedido,
         },
         select: {
           cliente_id: true,
-          id_pedidos: true,
+          id_pedido: true,
           quantidade: true,
           created_at: true,
-          produtos: { 
+          produtos: {
             select: {
               nome: true,
               id: true,
@@ -168,12 +166,12 @@ const showeOrdersByClient =async (req: Request, res: Response) => {
           }
         }
       });
-    
-     
+
+
       orderDetails.push({
 
         cliente_id: order.cliente_id,
-        id_pedidos: order.id_pedidos,
+        id_pedido: order.id_pedido,
         data_compra: order.created_at,
         produtos: productData.map(product => ({
           id: product.produtos.id,
@@ -187,7 +185,8 @@ const showeOrdersByClient =async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ message: "Erro interno do servidor" });
   }
-  }
+}
+
 export default {
   createOrder,
   showeAllOrders,

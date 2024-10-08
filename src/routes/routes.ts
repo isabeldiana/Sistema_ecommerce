@@ -5,14 +5,17 @@ import userType from "../Middleware/userType";
 import orders from "../controllers/Orders/orders";
 const router = Router();
 
+//users
 router.post('/createUsers', users.createUsers )
 
 //products
-router.post('/createProduct/:tipo_usuario', userType.admMiddleware, products.createProduct )
-router.put('/createProduct/:tipo_usuario/:id', userType.admMiddleware, products.updateProduct )
-router.delete('/createProduct/:tipo_usuario/:id', userType.admMiddleware, products.deleteProduct )
+router.post('/createProduct/:userType', userType.admMiddleware, products.createProduct )
+router.get('/showeProduct/:userType', userType.clientMiddleware, products.showStock )
+router.put('/updateProduct/:userType/:id', userType.admMiddleware, products.updateProduct )
+router.delete('/deleteProduct/:userType/:id', userType.admMiddleware, products.deleteProduct )
 
-router.post('/createOrder/:tipo_usuario/:id', userType.clientMiddleware, orders.createOrder )
-router.get('/showeOrders/:tipo_usuario', userType.admMiddleware, orders.showeAllOrders )
-router.get('/showeOrder/:tipo_usuario/:id', userType.clientMiddleware, orders.showeOrdersByClient )
+//orders
+router.post('/createOrder/:userType/:id', userType.clientMiddleware, orders.createOrder )
+router.get('/showeAllOrders/:userType', userType.admMiddleware, orders.showeAllOrders )
+router.get('/showeOrders/:userType/:id', userType.clientMiddleware, orders.showeOrdersByClient )
 export default router;

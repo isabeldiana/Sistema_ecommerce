@@ -1,9 +1,7 @@
-import { Prisma } from "@prisma/client";
-
 export type productsDto = {
   nome: string;
   descricao: string;
-  preco: Prisma.Decimal;
+  preco: number;
   estoque: number ;
   created_at: Date
 }
