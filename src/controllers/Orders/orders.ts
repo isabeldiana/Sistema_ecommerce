@@ -138,7 +138,58 @@ const showeAllOrders =async (req: Request, res: Response) => {
   }
 }
 
+const showeOrdersByClient =async (req: Request, res: Response) => {
+  try {
+    const {id} = req.params;
+    const orders = await prisma.pedidos.groupBy({
+      by: ['id_pedidos', 'cliente_id', 'created_at'],
+      where: {
+        cliente_id: parseInt(id)
+      },
+    });
+    let orderDetails = [];
+
+    for (const order of orders) {
+     
+      const productData = await prisma.pedidos.findMany({
+        where: {
+          id_pedidos: order.id_pedidos, 
+        },
+        select: {
+          cliente_id: true,
+          id_pedidos: true,
+          quantidade: true,
+          created_at: true,
+          produtos: { 
+            select: {
+              nome: true,
+              id: true,
+            }
+          }
+        }
+      });
+    
+     
+      orderDetails.push({
+
+        cliente_id: order.cliente_id,
+        id_pedidos: order.id_pedidos,
+        data_compra: order.created_at,
+        produtos: productData.map(product => ({
+          id: product.produtos.id,
+          nome: product.produtos.nome,
+          quantidade: product.quantidade
+        }))
+      });
+    }
+
+    return res.status(200).json(orderDetails);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
+  }
 export default {
   createOrder,
-  showeAllOrders
+  showeAllOrders,
+  showeOrdersByClient
 }
