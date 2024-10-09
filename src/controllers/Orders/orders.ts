@@ -1,11 +1,14 @@
 import { Request, Response } from 'express';
 import { ordersDto } from '../Orders/orders.dto';
 import prisma from '../../database/prismaClient';
+import { AuthenticatedRequest } from '../../Middleware/authMiddleware'; 
 
-const createOrder = async (req: Request, res: Response) => {
+const createOrder = async (req: AuthenticatedRequest, res: Response) => {
+  const { items }: { items: ordersDto[] } = req.body;
+  const id = req.user?.userId;
+  
   try {
-    const { items }: { items: ordersDto[] } = req.body;
-    const { id } = req.params;
+  
     const clientExist = await prisma.usuarios.findFirst({ where: { id: parseInt(id) } });
     if (!clientExist) {
       return res.status(404).json({ error: "Cliente não encontrado." });
@@ -136,9 +139,13 @@ const showeAllOrders = async (req: Request, res: Response) => {
   }
 }
 
-const showeOrdersByClient = async (req: Request, res: Response) => {
+const showeOrdersByClient = async (req: AuthenticatedRequest, res: Response) => {
+  const id = req.user?.userId;
+
+  
   try {
-    const { id } = req.params;
+
+  
     const orders = await prisma.pedidos.groupBy({
       by: ['id_pedido', 'cliente_id', 'created_at'],
       where: {
@@ -180,13 +187,17 @@ const showeOrdersByClient = async (req: Request, res: Response) => {
         }))
       });
     }
+    if (orderDetails.length === 0) {
+      return res.status(404).json({ message: "Nenhum pedido encontrado para este cliente." });
+    }
+    
 
     return res.status(200).json(orderDetails);
   } catch (error) {
+ 
     return res.status(500).json({ message: "Erro interno do servidor" });
   }
 }
-
 export default {
   createOrder,
   showeAllOrders,

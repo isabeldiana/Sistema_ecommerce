@@ -40,17 +40,25 @@ const updateProduct = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Produto não encontrado" })
     }
 
+    const updatedData: { nome?: string; descricao?: string; preco?: number; estoque?: number } = {};
+
+    if (nome !== undefined) {
+      updatedData.nome = nome;
+    }
+    if (descricao !== undefined) {
+      updatedData.descricao = descricao;
+    }
+    if (preco !== undefined) {
+      updatedData.preco = preco;
+    }
+    if (estoque !== undefined) {
+      updatedData.estoque = estoque; 
+    }
+
     const updateProduct = await prisma.produtos.update({
       where: { id: parseInt(id) },
-      data: {
-        nome,
-        descricao,
-        preco,
-        estoque: existProduct.estoque + estoque
-      }
+      data: updatedData, 
     });
-
-
     return res.status(200).json(updateProduct)
 
 
@@ -60,8 +68,9 @@ const updateProduct = async (req: Request, res: Response) => {
 }
 
 const deleteProduct = async (req: Request, res: Response) => {
+      const { id } = req.params;
   try {
-    const { id } = req.params;
+
     const existProduct = await prisma.produtos.findFirst({ where: { id: parseInt(id) } })
     if (!existProduct) {
       return res.status(404).json({ message: "Produto não encontrado" })
