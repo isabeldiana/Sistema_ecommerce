@@ -1,21 +1,28 @@
 import { Router } from "express";
 import users from '../controllers/Users/users'
 import products from "../controllers/Products/products";
-import userType from "../Middleware/userType";
 import orders from "../controllers/Orders/orders";
+import auth from "../Middleware/authMiddleware";
 const router = Router();
 
 //users
-router.post('/createUsers', users.createUsers )
+router.post('/createUsers', users.createUsers );
+router.post('/login', users.login );
+
+router.use(auth.authMiddleware) 
 
 //products
-router.post('/createProduct/:userType', userType.admMiddleware, products.createProduct )
-router.get('/showeProduct/:userType', userType.clientMiddleware, products.showStock )
-router.put('/updateProduct/:userType/:id', userType.admMiddleware, products.updateProduct )
-router.delete('/deleteProduct/:userType/:id', userType.admMiddleware, products.deleteProduct )
+router.post('/createProduct' , auth.verifyAdmin, products.createProduct );
+router.get('/showeProduct', auth.authMiddleware, auth.verifyAdmin , products.showStock );
+router.put('/updateProduct/:id', auth.authMiddleware, auth.verifyAdmin, products.updateProduct );
+router.delete('/deleteProduct/:id',auth.authMiddleware, auth.verifyAdmin, products.deleteProduct );
 
 //orders
-router.post('/createOrder/:userType/:id', userType.clientMiddleware, orders.createOrder )
-router.get('/showeAllOrders/:userType', userType.admMiddleware, orders.showeAllOrders )
-router.get('/showeOrders/:userType/:id', userType.clientMiddleware, orders.showeOrdersByClient )
-export default router;
+router.post('/createOrder', auth.verifyClient, auth.authMiddleware, orders.createOrder );
+router.get('/showeAllOrders', auth.verifyAdmin, orders.showeAllOrders );
+router.get('/showeOrders', auth.authMiddleware, auth.verifyClient, orders.showeOrdersByClient );
+
+
+
+
+export default router
